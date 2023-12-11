@@ -81,10 +81,8 @@ frappe.ui.form.on("Employee", {
 				employee: frm.doc.name,
 				email: frm.doc.prefered_email
 			},
-			freeze: true,
-			freeze_message: __("Creating User..."),
 			callback: function (r) {
-				frm.reload_doc();
+				frm.set_value("user_id", r.message);
 			}
 		});
 	}

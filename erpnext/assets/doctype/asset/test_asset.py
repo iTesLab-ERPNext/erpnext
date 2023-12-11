@@ -142,7 +142,12 @@ class TestAsset(AssetSetup):
 			("Creditors - _TC", 0.0, 100000.0),
 		)
 
-		gle = get_gl_entries("Purchase Invoice", pi.name)
+		gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Purchase Invoice' and voucher_no = %s
+			order by account""",
+			pi.name,
+		)
 		self.assertSequenceEqual(gle, expected_gle)
 
 		pi.cancel()
@@ -244,7 +249,12 @@ class TestAsset(AssetSetup):
 			),
 		)
 
-		gle = get_gl_entries("Journal Entry", asset.journal_entry_for_scrap)
+		gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Journal Entry' and voucher_no = %s
+			order by account""",
+			asset.journal_entry_for_scrap,
+		)
 		self.assertSequenceEqual(gle, expected_gle)
 
 		restore_asset(asset.name)
@@ -306,7 +316,13 @@ class TestAsset(AssetSetup):
 			("Debtors - _TC", 25000.0, 0.0),
 		)
 
-		gle = get_gl_entries("Sales Invoice", si.name)
+		gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no = %s
+			order by account""",
+			si.name,
+		)
+
 		self.assertSequenceEqual(gle, expected_gle)
 
 		si.cancel()
@@ -376,7 +392,13 @@ class TestAsset(AssetSetup):
 			("Debtors - _TC", 40000.0, 0.0),
 		)
 
-		gle = get_gl_entries("Sales Invoice", si.name)
+		gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no = %s
+			order by account""",
+			si.name,
+		)
+
 		self.assertSequenceEqual(gle, expected_gle)
 
 	def test_asset_with_maintenance_required_status_after_sale(self):
@@ -504,7 +526,13 @@ class TestAsset(AssetSetup):
 			("CWIP Account - _TC", 5250.0, 0.0),
 		)
 
-		pr_gle = get_gl_entries("Purchase Receipt", pr.name)
+		pr_gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Purchase Receipt' and voucher_no = %s
+			order by account""",
+			pr.name,
+		)
+
 		self.assertSequenceEqual(pr_gle, expected_gle)
 
 		pi = make_invoice(pr.name)
@@ -517,7 +545,13 @@ class TestAsset(AssetSetup):
 			("Creditors - _TC", 0.0, 5500.0),
 		)
 
-		pi_gle = get_gl_entries("Purchase Invoice", pi.name)
+		pi_gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Purchase Invoice' and voucher_no = %s
+			order by account""",
+			pi.name,
+		)
+
 		self.assertSequenceEqual(pi_gle, expected_gle)
 
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
@@ -544,7 +578,13 @@ class TestAsset(AssetSetup):
 
 		expected_gle = (("_Test Fixed Asset - _TC", 5250.0, 0.0), ("CWIP Account - _TC", 0.0, 5250.0))
 
-		gle = get_gl_entries("Asset", asset_doc.name)
+		gle = frappe.db.sql(
+			"""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Asset' and voucher_no = %s
+			order by account""",
+			asset_doc.name,
+		)
+
 		self.assertSequenceEqual(gle, expected_gle)
 
 	def test_asset_cwip_toggling_cases(self):
@@ -567,7 +607,10 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = get_gl_entries("Asset", asset_doc.name)
+		gle = frappe.db.sql(
+			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
+			asset_doc.name,
+		)
 		self.assertFalse(gle)
 
 		# case 1 -- PR with cwip disabled, Asset with cwip enabled
@@ -581,7 +624,10 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = get_gl_entries("Asset", asset_doc.name)
+		gle = frappe.db.sql(
+			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
+			asset_doc.name,
+		)
 		self.assertFalse(gle)
 
 		# case 2 -- PR with cwip enabled, Asset with cwip disabled
@@ -594,7 +640,10 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = get_gl_entries("Asset", asset_doc.name)
+		gle = frappe.db.sql(
+			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
+			asset_doc.name,
+		)
 		self.assertTrue(gle)
 
 		# case 3 -- PI with cwip disabled, Asset with cwip enabled
@@ -607,7 +656,10 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = get_gl_entries("Asset", asset_doc.name)
+		gle = frappe.db.sql(
+			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
+			asset_doc.name,
+		)
 		self.assertFalse(gle)
 
 		# case 4 -- PI with cwip enabled, Asset with cwip disabled
@@ -620,7 +672,10 @@ class TestAsset(AssetSetup):
 		asset_doc.available_for_use_date = nowdate()
 		asset_doc.calculate_depreciation = 0
 		asset_doc.submit()
-		gle = get_gl_entries("Asset", asset_doc.name)
+		gle = frappe.db.sql(
+			"""select name from `tabGL Entry` where voucher_type='Asset' and voucher_no = %s""",
+			asset_doc.name,
+		)
 		self.assertTrue(gle)
 
 		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", cwip)
@@ -1589,30 +1644,6 @@ class TestDepreciationBasics(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, jv.insert)
 
-	def test_multi_currency_asset_pr_creation(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro",
-			qty=1,
-			rate=100.0,
-			location="Test Location",
-			supplier="_Test Supplier USD",
-			currency="USD",
-		)
-
-		pr.submit()
-		self.assertTrue(get_gl_entries("Purchase Receipt", pr.name))
-
-
-def get_gl_entries(doctype, docname):
-	gl_entry = frappe.qb.DocType("GL Entry")
-	return (
-		frappe.qb.from_(gl_entry)
-		.select(gl_entry.account, gl_entry.debit, gl_entry.credit)
-		.where((gl_entry.voucher_type == doctype) & (gl_entry.voucher_no == docname))
-		.orderby(gl_entry.account)
-		.run()
-	)
-
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
@@ -1675,7 +1706,6 @@ def create_asset(**args):
 				"expected_value_after_useful_life": args.expected_value_after_useful_life or 0,
 				"depreciation_start_date": args.depreciation_start_date,
 				"daily_prorata_based": args.daily_prorata_based or 0,
-				"shift_based": args.shift_based or 0,
 			},
 		)
 

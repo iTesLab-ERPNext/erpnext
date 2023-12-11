@@ -8,7 +8,6 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
-from erpnext.accounts.utils import get_currency_precision
 
 
 def execute(filters=None):
@@ -36,7 +35,6 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 	def get_data(self, args):
 		self.data = []
 		self.receivables = ReceivablePayableReport(self.filters).run(args)[1]
-		self.currency_precision = get_currency_precision() or 2
 
 		self.get_party_total(args)
 
@@ -60,7 +58,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			gl_balance_map = get_gl_balance(self.filters.report_date, self.filters.company)
 
 		for party, party_dict in self.party_total.items():
-			if flt(party_dict.outstanding, self.currency_precision) == 0:
+			if party_dict.outstanding == 0:
 				continue
 
 			row = frappe._dict()

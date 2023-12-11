@@ -1,7 +1,7 @@
 from frappe import _
 
 app_name = "erpnext"
-app_title = "ERPNext"
+app_title = "SERP"
 app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = """ERP made simple"""
 app_icon = "fa fa-th"
@@ -82,8 +82,8 @@ calendars = [
 website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner"]
 
 website_context = {
-	"favicon": "/assets/erpnext/images/erpnext-favicon.svg",
-	"splash_image": "/assets/erpnext/images/erpnext-logo.svg",
+	"favicon": "/assets/erpnext/images/logoheader.jpg",
+	"splash_image": "/assets/erpnext/images/logoheader.jpg",
 }
 
 # nosemgrep
@@ -424,7 +424,7 @@ scheduler_events = {
 	"hourly_long": [
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
-		"erpnext.utilities.bulk_transaction.retry",
+		"erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log.retry_failing_transaction",
 	],
 	"daily": [
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
@@ -548,8 +548,6 @@ accounting_dimension_doctypes = [
 	"Subcontracting Receipt",
 	"Subcontracting Receipt Item",
 	"Account Closing Balance",
-	"Supplier Quotation",
-	"Supplier Quotation Item",
 ]
 
 # get matching queries for Bank Reconciliation

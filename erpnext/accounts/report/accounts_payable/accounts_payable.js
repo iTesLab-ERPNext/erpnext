@@ -145,11 +145,6 @@ frappe.query_reports["Accounts Payable"] = {
 			"fieldtype": "Check",
 		},
 		{
-			"fieldname": "for_revaluation_journals",
-			"label": __("Revaluation Journals"),
-			"fieldtype": "Check",
-		},
-		{
 			"fieldname": "ignore_accounts",
 			"label": __("Group by Voucher"),
 			"fieldtype": "Check",

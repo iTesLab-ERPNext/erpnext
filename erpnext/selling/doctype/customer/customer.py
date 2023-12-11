@@ -582,8 +582,7 @@ def get_customer_outstanding(
 		"""
 		select sum(debit) - sum(credit)
 		from `tabGL Entry` where party_type = 'Customer'
-		and is_cancelled = 0 and party = %s
-		and company=%s {0}""".format(
+		and party = %s and company=%s {0}""".format(
 			cond
 		),
 		(customer, company),

@@ -344,12 +344,11 @@ class SellingController(StockController):
 		return il
 
 	def has_product_bundle(self, item_code):
-		product_bundle = frappe.qb.DocType("Product Bundle")
-		return (
-			frappe.qb.from_(product_bundle)
-			.select(product_bundle.name)
-			.where((product_bundle.new_item_code == item_code) & (product_bundle.disabled == 0))
-		).run()
+		return frappe.db.sql(
+			"""select name from `tabProduct Bundle`
+			where new_item_code=%s and docstatus != 2""",
+			item_code,
+		)
 
 	def get_already_delivered_qty(self, current_docname, so, so_detail):
 		delivered_via_dn = frappe.db.sql(

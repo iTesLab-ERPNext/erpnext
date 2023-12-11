@@ -17,7 +17,6 @@ frappe.query_reports["Stock Analytics"] = {
 			fieldtype: "Link",
 			options:"Item",
 			default: "",
-			get_query: () => ({filters: { 'is_stock_item': 1 }}),
 		},
 		{
 			fieldname: "value_quantity",

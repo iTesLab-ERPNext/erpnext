@@ -267,9 +267,7 @@ class PickList(Document):
 				frappe.throw("Row #{0}: Item Code is Mandatory".format(item.idx))
 			if not cint(
 				frappe.get_cached_value("Item", item.item_code, "is_stock_item")
-			) and not frappe.db.exists(
-				"Product Bundle", {"new_item_code": item.item_code, "disabled": 0}
-			):
+			) and not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code}):
 				continue
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
@@ -407,9 +405,7 @@ class PickList(Document):
 		# bundle_item_code: Dict[component, qty]
 		product_bundle_qty_map = {}
 		for bundle_item_code in bundles:
-			bundle = frappe.get_last_doc(
-				"Product Bundle", {"new_item_code": bundle_item_code, "disabled": 0}
-			)
+			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": bundle_item_code})
 			product_bundle_qty_map[bundle_item_code] = {item.item_code: item.qty for item in bundle.items}
 		return product_bundle_qty_map
 

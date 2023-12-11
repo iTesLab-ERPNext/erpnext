@@ -181,14 +181,7 @@ class JobCard(Document):
 		query = (
 			frappe.qb.from_(jctl)
 			.from_(jc)
-			.select(
-				jc.name.as_("name"),
-				jctl.name.as_("row_name"),
-				jctl.from_time,
-				jctl.to_time,
-				jc.workstation,
-				jc.workstation_type,
-			)
+			.select(jc.name.as_("name"), jctl.to_time, jc.workstation, jc.workstation_type)
 			.where(
 				(jctl.parent == jc.name)
 				& (Criterion.any(time_conditions))
@@ -213,50 +206,17 @@ class JobCard(Document):
 			production_capacity = 1
 			query = query.where(jctl.employee == args.get("employee"))
 
-		existing_time_logs = query.run(as_dict=True)
+		existing = query.run(as_dict=True)
 
-		if not self.has_overlap(production_capacity, existing_time_logs):
-			return {}
+		if existing and production_capacity > len(existing):
+			return
 
 		if self.workstation_type:
-			if workstation := self.get_workstation_based_on_available_slot(existing_time_logs):
+			if workstation := self.get_workstation_based_on_available_slot(existing):
 				self.workstation = workstation
 				return None
 
-		return existing_time_logs[0] if existing_time_logs else None
-
-	def has_overlap(self, production_capacity, time_logs):
-		overlap = False
-		if production_capacity == 1 and len(time_logs) > 0:
-			return True
-
-		# Check overlap exists or not between the overlapping time logs with the current Job Card
-		for row in time_logs:
-			count = 1
-			for next_row in time_logs:
-				if row.name == next_row.name:
-					continue
-
-				if (
-					(
-						get_datetime(next_row.from_time) >= get_datetime(row.from_time)
-						and get_datetime(next_row.from_time) <= get_datetime(row.to_time)
-					)
-					or (
-						get_datetime(next_row.to_time) >= get_datetime(row.from_time)
-						and get_datetime(next_row.to_time) <= get_datetime(row.to_time)
-					)
-					or (
-						get_datetime(next_row.from_time) <= get_datetime(row.from_time)
-						and get_datetime(next_row.to_time) >= get_datetime(row.to_time)
-					)
-				):
-					count += 1
-
-			if count > production_capacity:
-				return True
-
-		return overlap
+		return existing[0] if existing else None
 
 	def get_workstation_based_on_available_slot(self, existing) -> Optional[str]:
 		workstations = get_workstations(self.workstation_type)
